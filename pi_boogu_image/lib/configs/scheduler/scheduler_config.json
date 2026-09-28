@@ -1,0 +1,9 @@
+{
+  "_class_name": "FlowMatchEulerDiscreteScheduler",
+  "_diffusers_version": "0.33.1",
+  "do_shift": true,
+  "dynamic_time_shift": false,
+  "time_shift_version": "v1",
+  "seq_len":  4096,
+  "num_train_timesteps": 1000
+}

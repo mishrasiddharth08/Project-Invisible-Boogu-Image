@@ -1,0 +1,16 @@
+{
+  "name": "PROJECT INVISIBLE - Boogu-Image-0.1",
+  "live_forge": "",
+  "snapshot_forge": "",
+  "archive_dir": "",
+  "extra_search_paths": [],
+  "automatic_downloads": false,
+  "default_steps": 28,
+  "default_cfg": 4.0,
+  "default_resolution": 1024,
+  "offload": "auto",
+  "upstream_revision": "25f8f888298224a94e5ec2abafb98abea9031a0d",
+  "max_outputs": 16,
+  "prompt_cache_mb": 64,
+  "adapter_trunks": {}
+}

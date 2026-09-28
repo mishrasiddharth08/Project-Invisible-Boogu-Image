@@ -1,0 +1,4 @@
+ComfyUI-DeGrid by lunaaispace-eng
+https://github.com/lunaaispace-eng/ComfyUI-DeGrid
+Revision: 5699bc33f71e1be12523fdea105cc9c2abfe1cd0
+Core and LICENSE copied unchanged. CPU PIL adapter is maintained separately.

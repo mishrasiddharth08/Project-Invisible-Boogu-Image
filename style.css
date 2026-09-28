@@ -1,0 +1,11 @@
+.boogu-foreign { filter: grayscale(1); opacity: .35; }
+.boogu-foreign::after {
+    content: attr(data-boogu-message);
+    position: absolute;
+    inset: auto 0 0;
+    padding: 6px;
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    pointer-events: none;
+}

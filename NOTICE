@@ -1,0 +1,12 @@
+PROJECT INVISIBLE — Boogu-Image-0.1
+Extension integration authored 2026. Licensed under Apache-2.0.
+
+Includes unmodified Boogu-Project/Boogu-Image source at
+25f8f888298224a94e5ec2abafb98abea9031a0d under pi_boogu_image/lib/vendor/boogu.
+Copyright (C) 2026 Boogu Team and original contributors identified in each file.
+Upstream contains Hugging Face and other Apache-2.0 attribution in source headers.
+Official model configuration JSON comes from Boogu/Boogu-Image-0.1-Base.
+Quantized formats are decoded using the installed host's Comfy-Kitchen API.
+No model weights are distributed in this extension.
+The Qwen3-VL-8B processor/tokenizer is reused from the existing reference
+extension's qwen3vl_8b_config directory (Qwen3-VL Apache-2.0 model assets).

@@ -1,0 +1,20 @@
+{
+  "official_repo": "https://github.com/Boogu-Project/Boogu-Image",
+  "revision": "25f8f888298224a94e5ec2abafb98abea9031a0d",
+  "models": {
+    "Boogu/Boogu-Image-0.1-Base": "334ad7e5c6343d33308b306127e047b133e86926",
+    "Comfy-Org/Boogu-Image": "0e060b5c47ce43918f5943d166e57b73b09d72f8"
+  },
+  "processor_files": [
+    "processor/added_tokens.json",
+    "processor/chat_template.jinja",
+    "processor/merges.txt",
+    "processor/preprocessor_config.json",
+    "processor/special_tokens_map.json",
+    "processor/tokenizer.json",
+    "processor/tokenizer_config.json",
+    "processor/video_preprocessor_config.json",
+    "processor/vocab.json"
+  ],
+  "processor_provenance": "Reused local project-invisible-ideogram-4/pi_ideogram_lib/qwen3vl_8b_config; validated Qwen3VLProcessor load and real T2I/TI2I inference."
+}

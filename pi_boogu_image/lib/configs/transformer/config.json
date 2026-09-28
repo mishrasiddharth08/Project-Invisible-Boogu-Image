@@ -1,0 +1,44 @@
+{
+  "_class_name": "BooguImageTransformer2DModel",
+  "_diffusers_version": "0.35.2",
+  "axes_dim_rope": [
+    40,
+    40,
+    40
+  ],
+  "axes_lens": [
+    2048,
+    1664,
+    1664
+  ],
+  "ffn_dim_multiplier": null,
+  "hidden_size": 3360,
+  "in_channels": 16,
+  "instruction_feature_configs": {
+    "instruction_feat_dim": 4096,
+    "num_instruction_feature_layers": 1,
+    "reduce_type": "mean"
+  },
+  "multiple_of": 256,
+  "norm_eps": 1e-05,
+  "num_attention_heads": 28,
+  "num_double_stream_layers": 8,
+  "num_kv_heads": 7,
+  "num_layers": 40,
+  "num_refiner_layers": 2,
+  "out_channels": null,
+  "patch_size": 2,
+  "prompt_tuning_configs": {
+    "ffn_dim_multiplier": null,
+    "hidden_size": 4096,
+    "multiple_of": 256,
+    "norm_eps": 1e-05,
+    "num_attention_heads": 32,
+    "num_kv_heads": 8,
+    "num_layers": 0,
+    "num_trainable_prompt_tokens": 0,
+    "use_causal_mask": true,
+    "use_prompt_tuning": false
+  },
+  "timestep_scale": 1000.0
+}

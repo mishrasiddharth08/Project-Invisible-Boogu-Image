@@ -1,0 +1,13 @@
+# Install manually into the EXISTING Forge Python only. No Torch/CUDA replacement.
+# Official Boogu source is vendored at the revision in sources.json.
+diffusers>=0.35.2,<0.39
+transformers>=4.57.3,<5
+accelerate>=1.0
+safetensors>=0.6
+einops>=0.7
+huggingface-hub>=0.34,<1
+peft>=0.17,<0.19
+Pillow>=10
+numpy>=1.26
+# INT8 ConvRot/NVFP4 require Forge Neo's existing comfy-kitchen implementation.
+# Do not replace it automatically: its CUDA wheel must match the host runtime.
