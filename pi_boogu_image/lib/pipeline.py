@@ -12,6 +12,7 @@ from . import assets
 LOCK = threading.RLock()
 _pipe = None
 _identity = None
+_component_cache = {}
 CONFIGS = Path(__file__).parent / "configs"
 
 @contextmanager
@@ -56,13 +57,16 @@ def invoke(pipe, **kwargs):
 
 def invoke_with_recovery(asset, adapters, width, height, seed, kwargs, state, opts):
     import torch
-    from .runtime import progress_hooks
+    from .runtime import SkipImage, progress_hooks
     kwargs = dict(kwargs)
     pipe = get(asset, adapters, width, height)
     for attempt in range(2):
         try:
             with progress_hooks(pipe, state, opts):
                 return invoke(pipe, **kwargs), pipe._boogu_offload
+        except SkipImage:
+            pipe.maybe_free_model_hooks()
+            raise
         except torch.cuda.OutOfMemoryError:
             if attempt or getattr(pipe, "_boogu_offload", "sequential") != "model":
                 raise
@@ -146,32 +150,69 @@ def processor_path():
                 return candidate
     raise RuntimeError("Boogu tokenizer/processor is missing. Run setup-models.cmd, review its download plan, then type DOWNLOAD.")
 
+
+def invalidate_components():
+    """Rescan support weights after Forge's native checkpoint refresh."""
+    with LOCK:
+        _component_cache.clear()
+
+
+def _components(portable):
+    with LOCK:
+        cached = _component_cache.get(portable)
+        if cached is not None and cached[0].is_file() and cached[1].is_file() and (cached[2] / "tokenizer.json").is_file():
+            return cached
+        te = assets.component("te", unquantized_only=portable)
+        vae = assets.component("vae")
+        if not te or not vae:
+            raise RuntimeError("Missing compatible Qwen3-VL-8B text encoder or Flux1 VAE. Compatibility mode requires unquantized weights. Run setup-models.cmd; downloads require confirmation.")
+        result = (te[0], vae[0], processor_path())
+        # processor_path returns a directory; validate its required file below.
+        _component_cache[portable] = result
+        return result
+
+
+def _can_reuse(pipe, width, height, requested, device):
+    from .runtime import choose_offload
+    if requested not in ("auto", "model", "sequential"):
+        raise ValueError("offload must be auto, model, or sequential")
+    current = pipe._boogu_offload
+    if current == "sequential" and requested != "model":
+        return True
+    if current == "model" and requested != "sequential" and width * height <= pipe._boogu_max_pixels:
+        return True
+    import torch
+    free_bytes, _ = torch.cuda.mem_get_info(device)
+    mode = choose_offload(free_bytes, pipe._boogu_component_bytes, width, height, requested)
+    if mode != current:
+        return False
+    pipe._boogu_max_pixels = max(pipe._boogu_max_pixels, width * height)
+    return True
+
+
 def get(asset, adapters, width=1024, height=1024, offload=None):
     global _pipe, _identity
     import torch
     from .hardware import detect, validate_weights
     hardware = detect(torch)
     dtype = hardware.dtype
-    validate_weights(asset.path, hardware)
-    te = assets.component("te", unquantized_only=True) if hardware.portable else assets.component("te")
-    vae = assets.component("vae")
     full = asset.path.name == "model_index.json"
-    if not full and (not te or not vae):
-        raise RuntimeError("Missing compatible Qwen3-VL-8B text encoder or Flux1 VAE. Compatibility mode requires unquantized weights. Run setup-models.cmd; downloads require confirmation.")
-    if not full:
-        validate_weights(te[0], hardware)
-        validate_weights(vae[0], hardware)
-    processor = None if full else processor_path()
+    te, vae, processor = (None, None, None) if full else _components(hardware.portable)
+    requested = offload or assets.config().get("offload", "auto")
     identity = (assets.fingerprint(asset.path), asset.trunk,
                 tuple((assets.fingerprint(p), w) for p, w in adapters),
-                assets.fingerprint(te[0]) if te and not full else None,
-                assets.fingerprint(vae[0]) if vae and not full else None,
+                assets.fingerprint(te) if te else None,
+                assets.fingerprint(vae) if vae else None,
         assets.fingerprint(processor / "tokenizer.json") if processor else None,
-        width, height, offload or assets.config().get("offload", "auto"), hardware.device, str(dtype))
+        hardware.device, str(dtype))
     with LOCK:
-        if _pipe is not None and identity == _identity:
+        if _pipe is not None and identity == _identity and _can_reuse(_pipe, width, height, requested, hardware.device):
             return _pipe
         release()
+        validate_weights(asset.path, hardware)
+        if not full:
+            validate_weights(te, hardware)
+            validate_weights(vae, hardware)
         # Free Forge's loaded models through its public memory lifecycle.
         from backend import memory_management
         memory_management.unload_all_models()
@@ -204,9 +245,9 @@ def get(asset, adapters, width=1024, height=1024, offload=None):
                     transformer = BooguImageTransformer2DModel.from_config(_json("transformer"))
                     mllm = Qwen3VLForConditionalGeneration(Qwen3VLConfig.from_dict(_json("mllm")))
                 transformer = load_single(transformer, asset.path, dtype=dtype)
-                mllm = load_single(mllm, te[0], te_key, dtype=dtype)
+                mllm = load_single(mllm, te, te_key, dtype=dtype)
                 # Diffusers has a native Flux AE conversion; local config forbids Hub fallback.
-                autoencoder = AutoencoderKL.from_single_file(str(vae[0]), config=str(CONFIGS / "vae"),
+                autoencoder = AutoencoderKL.from_single_file(str(vae), config=str(CONFIGS / "vae"),
                                    local_files_only=True, torch_dtype=dtype)
                 proc = Qwen3VLProcessor.from_pretrained(str(processor), local_files_only=True)
                 scheduler = FlowMatchEulerDiscreteScheduler.from_config(_json("scheduler"))
@@ -216,9 +257,9 @@ def get(asset, adapters, width=1024, height=1024, offload=None):
             pipe._boogu_has_adapters = bool(adapters)
             from .runtime import choose_offload, module_bytes
             free_bytes, _ = torch.cuda.mem_get_info(hardware.device)
-            mode = choose_offload(free_bytes,
-                [module_bytes(pipe.mllm), module_bytes(pipe.transformer), module_bytes(pipe.vae)],
-                width, height, offload or assets.config().get("offload", "auto"))
+            pipe._boogu_component_bytes = [module_bytes(pipe.mllm), module_bytes(pipe.transformer), module_bytes(pipe.vae)]
+            pipe._boogu_max_pixels = width * height
+            mode = choose_offload(free_bytes, pipe._boogu_component_bytes, width, height, requested)
             pipe.enable_model_cpu_offload_flag = mode == "model"
             pipe.enable_sequential_cpu_offload_flag = mode == "sequential"
             if mode == "model":

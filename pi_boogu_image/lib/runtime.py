@@ -2,6 +2,17 @@
 from contextlib import contextmanager
 from time import monotonic
 
+class SkipImage(InterruptedError):
+    pass
+
+
+def check_cancel(state):
+    if state.interrupted:
+        raise InterruptedError("Boogu generation interrupted")
+    if state.skipped:
+        raise SkipImage("Boogu image skipped")
+
+
 def begin_preview(state, width, height):
     from PIL import Image
     scale = min(1.0, 512 / max(width, height))
@@ -50,8 +61,7 @@ def progress_hooks(pipe, state, opts):
     last_preview = float("-inf")
 
     def check(stage):
-        if state.interrupted or state.skipped:
-            raise InterruptedError("Boogu generation interrupted")
+        check_cancel(state)
         state.textinfo = progress_text(state, stage.removeprefix("Boogu: "))
 
     def preview(latents):

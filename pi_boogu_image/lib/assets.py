@@ -34,9 +34,11 @@ def roots():
     return [models / n for n in names] + [Path(p) for p in config().get("extra_search_paths", [])]
 
 def trunk(path):
-    text = re.sub(r"[^a-z0-9]+", "_", str(path).lower())
-    edit = "edit" in text
-    turbo = "turbo" in text or "hotfix" in text
+    path = Path(path)
+    name = path.parent.name if path.name == "model_index.json" else path.stem
+    tokens = set(re.split(r"[^a-z0-9]+", name.lower()))
+    edit = "edit" in tokens
+    turbo = bool(tokens & {"turbo", "hotfix"})
     return "edit-turbo" if edit and turbo else "edit" if edit else "turbo" if turbo else "base"
 
 def quant(path):

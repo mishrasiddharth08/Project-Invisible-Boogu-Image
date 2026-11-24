@@ -45,6 +45,7 @@
             if (!booguSelected) return previous.call(this, id, container, gallery, atEnd, onProgress, ...rest);
             const current = document.createElement('div');
             current.className = 'progressDiv boogu-current-progress';
+            current.style.display = opts.show_progressbar ? 'block' : 'none';
             current.setAttribute('aria-label', 'Current image progress');
             const fill = document.createElement('div');
             fill.className = 'progress';

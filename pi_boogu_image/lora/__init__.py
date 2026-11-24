@@ -39,6 +39,24 @@ def _lora_targets(state_dict):
         raise ValueError("Incomplete LoRA tensor pairs: " + ", ".join(incomplete[:4]))
     return set(pairs)
 
+def _normalize_lora_state(state_dict):
+    normalized = {}
+    for key, value in state_dict.items():
+        match = _LORA.match(key)
+        if not match:
+            raise ValueError("Unsupported tensor in LoRA checkpoint: " + key)
+        target, side = match.groups()
+        if target.startswith("prompt_embedding."):
+            raise ValueError("Prompt-embedding LoRA is not supported")
+        if target.startswith("transformer."):
+            target = target[len("transformer."):]
+        canonical = "transformer." + target + ".lora_" + side.upper() + ".weight"
+        if canonical in normalized:
+            raise ValueError("Duplicate LoRA tensor: " + canonical)
+        normalized[canonical] = value
+    return normalized
+
+
 def _validate_lora_targets(model, state_dict):
     targets = _lora_targets(state_dict)
     modules = dict(model.named_modules())
@@ -93,7 +111,7 @@ def classification(path):
     if not declared:
         declared = config().get("adapter_trunks", {}).get(path.name)
     target = str(declared).lower().replace("_", "-") if declared else trunk(name)
-    if not declared and not any(x in name for x in ("base", "turbo", "edit")):
+    if not declared and not re.search(r"(?:^|[^a-z0-9])(?:base|turbo|edit|hotfix)(?:$|[^a-z0-9])", name):
         _kind(data)
         return "unknown", False
     if target not in ("base", "turbo", "edit", "edit-turbo", "all"):
@@ -155,7 +173,7 @@ def apply(pipe, adapters):
         for index, (path, strength) in enumerate(loras):
             name = f"boogu_{index}"
             try:
-                state = pipe.lora_state_dict(path, local_files_only=True)
+                state = _normalize_lora_state(pipe.lora_state_dict(path, local_files_only=True))
                 targets = _validate_lora_targets(pipe.transformer, state)
                 materialize_lora_targets(pipe.transformer, targets)
                 modules = dict(pipe.transformer.named_modules())

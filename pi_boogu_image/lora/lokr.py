@@ -83,6 +83,7 @@ class LokrLinear(nn.Module):
 
 
 def _split_key(key):
+    key = key.removesuffix(".weight")
     for suffix in _SUFFIXES:
         marker = "." + suffix
         if key.endswith(marker):

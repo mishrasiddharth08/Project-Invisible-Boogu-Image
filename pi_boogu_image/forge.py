@@ -33,6 +33,7 @@ def selected(p=None, name=None):
     return None
 
 def register_checkpoints():
+    pipeline.invalidate_components()
     from modules import sd_models
     discovered = assets.scan()
     _registered.clear()
@@ -153,6 +154,7 @@ def controls(p, runner, args, asset):
 def generate(p, asset, runner=None, args=()):
     from modules import processing, shared, images
     import torch
+    from .lib.runtime import SkipImage, check_cancel
     from .lora import resolve
     output, seeds, prompts, negatives, infotexts = [], [], [], [], []
     info = ""
@@ -161,7 +163,7 @@ def generate(p, asset, runner=None, args=()):
         try:
             is_img2img = isinstance(p, processing.StableDiffusionProcessingImg2Img)
             refs = getattr(p, "init_images", None) or []
-            policy.validate_task(asset.trunk, is_img2img, len(refs))
+            policy.validate_task(asset.trunk, is_img2img, len({id(ref) for ref in refs}))
             if getattr(p, "enable_hr", False):
                 raise ValueError("Turn off Hires fix for Boogu; choose the Boogu resolution ceiling instead.")
             cfg = assets.config()
@@ -194,8 +196,7 @@ def generate(p, asset, runner=None, args=()):
             reference = refs[0].convert("RGB") if is_img2img else None
 
             def step(index, total):
-                if shared.state.interrupted or shared.state.skipped:
-                    raise InterruptedError("Boogu generation interrupted")
+                check_cancel(shared.state)
                 shared.state.sampling_step, shared.state.sampling_steps = index + 1, total
                 from .lib.runtime import progress_text
                 shared.state.textinfo = progress_text(shared.state, "generating image")
@@ -205,7 +206,7 @@ def generate(p, asset, runner=None, args=()):
                     break
                 prompt = shared.prompt_styles.apply_styles_to_prompt(positive[index], p.styles)
                 neg = shared.prompt_styles.apply_negative_styles_to_prompt(negative[index], p.styles)
-                prompt, adapters = resolve(prompt, asset.trunk)
+                instruction, adapters = resolve(prompt, asset.trunk)
                 neg, negative_adapters = resolve(neg, asset.trunk)
                 if negative_adapters:
                     raise ValueError("Place Boogu LoRAs in the positive prompt")
@@ -217,10 +218,17 @@ def generate(p, asset, runner=None, args=()):
                 shared.state.textinfo = "Boogu: loading model"
                 from .lib.runtime import begin_preview
                 begin_preview(shared.state, p.width, p.height)
-                kwargs = policy.arguments(asset.trunk, prompt, neg, resolved, reference)
+                kwargs = policy.arguments(asset.trunk, instruction, neg, resolved, reference)
                 kwargs.update(generator=torch.Generator(hardware.device).manual_seed(seed), step_func=step)
-                result, offload = pipeline.invoke_with_recovery(asset, adapters,
-                    p.width, p.height, seed, kwargs, shared.state, shared.opts)
+                try:
+                    result, offload = pipeline.invoke_with_recovery(asset, adapters,
+                        p.width, p.height, seed, kwargs, shared.state, shared.opts)
+                except SkipImage:
+                    shared.state.skipped = False
+                    shared.state.nextjob()
+                    if not output:
+                        info = "Boogu image skipped"
+                    continue
                 image = result.images[0]
                 if grid_filter:
                     from .lib.degrid import reduce_grid
