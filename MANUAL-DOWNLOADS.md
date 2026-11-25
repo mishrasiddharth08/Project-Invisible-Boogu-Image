@@ -35,7 +35,7 @@ From the same verified repository, download:
 
 The manifest offers only the FP8 shared Qwen3-VL 8B encoder. For AMD or another path requiring unquantized weights, reuse an existing supported unquantized **Qwen3-VL 8B** encoder with vision weights. This extension does not claim a verified BF16 encoder download filename or link.
 
-The processor/tokenizer files are already bundled with this extension. If that bundle is missing, the automatic planner lists the exact processor files from the pinned [Boogu/Boogu-Image-0.1-Base repository](https://huggingface.co/Boogu/Boogu-Image-0.1-Base/tree/334ad7e5c6343d33308b306127e047b133e86926/processor) for `Forge/models/Boogu/support/processor/`.
+The bundled files alone are not a complete processor. For single-file installs without a complete local processor or matching pinned cache, run `setup-models.cmd` to see what is missing. For manual setup, use the complete processor from the pinned [Boogu/Boogu-Image-0.1-Base repository](https://huggingface.co/Boogu/Boogu-Image-0.1-Base/tree/334ad7e5c6343d33308b306127e047b133e86926/processor) and place those files in `Forge/models/Boogu/support/processor/`.
 
 ## 4. Verify without downloading
 

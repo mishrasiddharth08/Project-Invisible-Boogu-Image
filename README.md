@@ -87,7 +87,7 @@ The extension searches all these folders before offering a download:
 
 Keep a real Boogu transformer safetensors file, a Qwen3-VL **8B** encoder with its vision weights, and a **Flux1 16-channel VAE**. Flux2 VAEs and Qwen3 text-only encoders are rejected. Do not rename an unrelated model to Boogu. Detection verifies tensor headers and required keys. Incomplete `.partial` files are ignored.
 
-Single-file transformer weights use the pinned official transformer config and strict key/shape matching. This build bundles a reused local Qwen3-VL-8B processor/tokenizer; no duplicate download is needed. Without that bundled copy, the shared processor/tokenizer goes in `models/Boogu/support/processor/`. Complete local official pipeline directories containing `model_index.json` are also discovered. GGUF is deliberately not registered: no proven Boogu GGUF pipeline loader is bundled.
+Single-file transformer weights use the pinned official transformer config and strict key/shape matching. The files bundled with this extension are not a complete processor. Single-file installs can reuse a complete local processor or the revision-pinned Hugging Face cache. If neither is available, use `setup-models.cmd` to list and fetch the missing files, or follow [MANUAL-DOWNLOADS.md](MANUAL-DOWNLOADS.md) to put the full pinned processor in `models/Boogu/support/processor/`. Complete local official pipeline directories containing `model_index.json` are also discovered. GGUF is deliberately not registered: no proven Boogu GGUF pipeline loader is bundled.
 
 ## Memory
 
