@@ -37,7 +37,7 @@ def plan(trunk, precision):
     manifest = json.loads((assets.EXT / "sources.json").read_text(encoding="utf-8"))
     from ..lib.pipeline import CONFIGS
     processor_files = manifest["processor_files"]
-    if (CONFIGS / "processor/tokenizer.json").is_file() and (CONFIGS / "processor/preprocessor_config.json").is_file():
+    if assets.processor_complete(CONFIGS / "processor"):
         reused.append(str(CONFIGS / "processor"))
         processor_files = []
     for filename in processor_files:

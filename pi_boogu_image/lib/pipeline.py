@@ -142,11 +142,32 @@ def _json(component):
 
 def processor_path():
     bundled = CONFIGS / "processor"
-    if (bundled / "tokenizer.json").is_file() and (bundled / "preprocessor_config.json").is_file():
+    if assets.processor_complete(bundled):
         return bundled
     for root in assets.roots():
         for candidate in (root / "support/processor", root / "processor"):
-            if (candidate / "tokenizer.json").is_file() and (candidate / "preprocessor_config.json").is_file():
+            if assets.processor_complete(candidate):
+                return candidate
+    # An incomplete older bundle should not hide an already downloaded official processor.
+    # This uses the pinned local cache only; setup is still explicit when the cache is missing.
+    try:
+        from huggingface_hub import snapshot_download
+        from huggingface_hub.errors import LocalEntryNotFoundError
+    except ImportError:
+        snapshot_download = None
+    if snapshot_download is not None:
+        repo = "Boogu/Boogu-Image-0.1-Base"
+        revision = json.loads((assets.EXT / "sources.json").read_text(encoding="utf-8"))["models"][repo]
+        # Forge redirects Hugging Face into its own models folder; the original
+        # local download may still be in Hugging Face's standard user cache.
+        for cache_dir in (None, Path.home() / ".cache" / "huggingface" / "hub"):
+            try:
+                extra = {} if cache_dir is None else {"cache_dir": cache_dir}
+                candidate = Path(snapshot_download(repo_id=repo, revision=revision, local_files_only=True,
+                                                   allow_patterns=["processor/*"], **extra)) / "processor"
+            except LocalEntryNotFoundError:
+                continue
+            if assets.processor_complete(candidate):
                 return candidate
     raise RuntimeError("Boogu tokenizer/processor is missing. Run setup-models.cmd, review its download plan, then type DOWNLOAD.")
 

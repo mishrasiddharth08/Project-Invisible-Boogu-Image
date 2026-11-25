@@ -19,7 +19,7 @@
   "pi_boogu_image/__init__.py": "7bf7f6288f89608c2ec745428b122a7d1df96874529e3d2d113e8dc5842abf74",
   "scripts/engine.py": "fbe26673f6e9254ef9dd69174d4a4ed7f694e42e7f7e8a65fbf6933350e2be0d",
   "tests/test_degrid.py": "9b362e9f8996405db09a35202feda9bd21434a024ff0af5ea82258f518f8d599",
-  "tests/test_download.py": "396bde3c5c0a5ab28b521ddb26e3feabe894adbd56ea58a0a264ea917685fe4d",
+  "tests/test_download.py": "c19d5f0cc4d8d445d10756544888f4c792b754ed0d22193a82abab2d92553d3e",
   "tests/test_forge_hooks.py": "4d70410f7d3718630c1d6eab036291f9fd093e1d5647c80aaf853b758a33f6e6",
   "tests/test_grid_filter.py": "e6918fca4626b85dd841fda32695a577d38c9b8d181a33bde17f8324de02638b",
   "tests/test_hardware.py": "8a153c3a5b573c22443c8f9b35703d23f7b518993d406d6c155c42ef6443c5f7",
@@ -32,13 +32,13 @@
   "tests/test_runtime.py": "256e52713153ea50a14396fa530a8b87f9224ee7143d64e9bd57d02670369f73",
   "tests/test_ui.py": "8e2b380e5a60d9aa6236175d936a4f3af154f80c4b74f7b3187f1a2d6a993c59",
   "tests/test_weights.py": "5bca6fea260441860c6bcae97f7387fceae2652bb706c7f3ce7d4139e3cd045d",
-  "pi_boogu_image/download/setup.py": "ab450e622c7888b3483295d67ddd6dfda3c6f500855d092541c65740f7f1c5e9",
+  "pi_boogu_image/download/setup.py": "25d6382fb5d199bbbc330855963b8a0146a0b89e4ebabbb13763ea3d63d498b1",
   "pi_boogu_image/download/__init__.py": "7bf870b07b1de440ae0a3184f3015011a9367d33dbcdf73768b7b6463b0457f6",
-  "pi_boogu_image/lib/assets.py": "6bb9f54e4289166a09ea2b758500441d03eabcf0b8ff3af4db9c4433c711e3c6",
+  "pi_boogu_image/lib/assets.py": "de45b9dcabb4885e81b9ee8e61af6807250a0429d761ea55e509c2453980cf9d",
   "pi_boogu_image/lib/degrid.py": "16e1b9d5d8b8d947bae1be43860cfee7ea0e5b2c71fbc64d539c74f648cfc4e5",
   "pi_boogu_image/lib/grid_filter.py": "d6196ce90b40734c8d1301ba578db0c5dbb171f5a10cc5797fabfdebd4d0cf4a",
   "pi_boogu_image/lib/hardware.py": "863680d811c9af19f801df3e8020baf5e1b900ff48e38ef747f002ef2d00e5e1",
-  "pi_boogu_image/lib/pipeline.py": "ae3c094097c94739b8b143848ba8aa76be61e41c87a02219de7a755dbd9e2197",
+  "pi_boogu_image/lib/pipeline.py": "c59f84792bef67471032ddd5033f74b35bcde670b69a3449d45bd38df9f495c7",
   "pi_boogu_image/lib/policy.py": "60df748a4990b11305ed3ef6a53bada0ddc53860312378f0fa90684d0a77a1ab",
   "pi_boogu_image/lib/prompt_cache.py": "fd76a692acb861c80d9cf19985b4751b958ab99de001a6ea983dea3b636ee788",
   "pi_boogu_image/lib/runtime.py": "5fa69089889c119fe847f2f0b56e55f384c4927e48fa215d94e97192aaf4db55",
@@ -95,5 +95,6 @@
   "pi_boogu_image/lib/configs/vae/config.json": "abcdfc9b94b303ed8d2e8f4b3e1b13008351cd936b155a00340be84c76a54249",
   "tests/test_cache_reuse.py": "ac42ab76031b108b86101e8d460fa1a38140c3a40387f4e7c6f3029cc67741b7",
   "tests/test_adapter_regressions.py": "c81e68a71ee12ee597c031e898cdb17a2662fcaaff91c9c4c5f89e2798395c40",
-  "tests/test_batch_integration.py": "cf7b5a327bce94fad0725c42591898dc913c4ba7d20bf98731f415f8a17559d5"
+  "tests/test_batch_integration.py": "cf7b5a327bce94fad0725c42591898dc913c4ba7d20bf98731f415f8a17559d5",
+  "tests/test_cached_processor.py": "e6bfe71a371bb8bba72168a1e411a5f4fa0926a986575f894b91ea0b621ae8c3"
 }

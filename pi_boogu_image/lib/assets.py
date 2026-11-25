@@ -148,3 +148,10 @@ def fingerprint(path):
     path = Path(path)
     stat = path.stat()
     return str(path.resolve()), stat.st_size, stat.st_mtime_ns
+
+
+def processor_complete(folder):
+    import json
+    files = json.loads((EXT / "sources.json").read_text(encoding="utf-8"))["processor_files"]
+    return all((folder / Path(name).name).is_file() and
+               (folder / Path(name).name).stat().st_size > 0 for name in files)

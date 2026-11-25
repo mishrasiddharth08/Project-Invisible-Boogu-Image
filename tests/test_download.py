@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -14,8 +15,9 @@ def fake_pipeline(folder):
     module.CONFIGS = Path(folder)
     processor = module.CONFIGS / "processor"
     processor.mkdir()
-    (processor / "tokenizer.json").write_text("{}")
-    (processor / "preprocessor_config.json").write_text("{}")
+    pins = json.loads((setup.assets.EXT / "sources.json").read_text(encoding="utf-8"))
+    for name in pins["processor_files"]:
+        (processor / Path(name).name).write_text("{}")
     return module
 
 
